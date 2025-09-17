@@ -12,7 +12,8 @@ import io
 import json
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
-import certifi # <-- Important for the SSL fix
+import certifi
+from dotenv import load_dotenv
 
 # Imports for PDF Generation
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
@@ -22,35 +23,62 @@ from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 
+# Load environment variables from .env file for local development
+load_dotenv()
+
+# --- Configuration from Environment ---
+# All secrets and configurations are now loaded from the environment.
+FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
+FIREBASE_DATABASE_URL = os.environ.get('FIREBASE_DATABASE_URL')
+FIREBASE_CREDS_JSON = os.environ.get('FIREBASE_CREDS_JSON')
+
+R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID')
+R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
+R2_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY')
+R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME')
+R2_PUBLIC_URL_BASE = os.environ.get('R2_PUBLIC_URL_BASE')
+
+GMAIL_SENDER_EMAIL = os.environ.get('GMAIL_SENDER_EMAIL')
+GMAIL_SENDER_PASSWORD = os.environ.get('GMAIL_SENDER_PASSWORD')
+
 # --- Flask App Setup ---
 app = Flask(__name__)
-CORS(app, resources={
-    r"/*": {"origins": "*"}
-})
-app.secret_key = 'your_super_secret_key'
+CORS(app, resources={r"/*": {"origins": "*"}})
+app.secret_key = FLASK_SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
-# --- Firebase Initialization ---
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://nila-products-default-rtdb.firebaseio.com/'
-})
+# --- Firebase Initialization (Secure Method) ---
+try:
+    if FIREBASE_CREDS_JSON and FIREBASE_DATABASE_URL:
+        firebase_creds_dict = json.loads(FIREBASE_CREDS_JSON)
+        cred = credentials.Certificate(firebase_creds_dict)
+        firebase_admin.initialize_app(cred, {'databaseURL': FIREBASE_DATABASE_URL})
+        print("✅ Firebase initialized successfully.")
+    else:
+        print("❌ ERROR: FIREBASE_CREDS_JSON or FIREBASE_DATABASE_URL environment variable not set.")
+except (json.JSONDecodeError, TypeError) as e:
+    print(f"❌ ERROR: Failed to parse Firebase credentials. Error: {e}")
+except Exception as e:
+    print(f"❌ ERROR: Failed to initialize Firebase. Error: {e}")
 
-# --- Cloudflare R2 Configuration ---
-R2_ACCOUNT_ID = '6991a8c34f6392f9f8e53363fd3f1639'
-R2_ACCESS_KEY_ID = '145aef4dd78057ee05588513539a8383'
-R2_SECRET_ACCESS_KEY = '34dc3e76cb42568c0b742bcca16300a040e739d5b55f5b73da9843f6007307b8'
-R2_BUCKET_NAME = 'nilavideo'
-R2_PUBLIC_URL_BASE = 'https://pub-33477a714a8840718c7b8c79c1057e92.r2.dev'
-
-s3_client = boto3.client(
-    's3',
-    endpoint_url=f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
-    aws_access_key_id=R2_ACCESS_KEY_ID,
-    aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    region_name='auto',
-    verify=certifi.where()
-)
+# --- Cloudflare R2 Client Initialization ---
+try:
+    if all([R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY]):
+        s3_client = boto3.client(
+            's3',
+            endpoint_url=f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
+            aws_access_key_id=R2_ACCESS_KEY_ID,
+            aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+            region_name='auto',
+            verify=certifi.where()
+        )
+        print("✅ S3 client initialized successfully.")
+    else:
+        s3_client = None
+        print("⚠️ Warning: S3 client not initialized. R2 credentials missing from environment.")
+except Exception as e:
+    s3_client = None
+    print(f"❌ ERROR: Failed to initialize S3 client. Error: {e}")
 
 
 # --- Database Setup (Injects Sample Products) ---
@@ -92,7 +120,7 @@ def setup_careers_database():
             "offices": {
                 "loc01": { "city": 'Chennai, TN', "type": 'Corporate Office', "address": '123 NILA Towers, Anna Salai, Chennai, 600002' },
                 "loc02": { "city": 'Mumbai, MH', "type": 'Showroom & Office', "address": '456 Silk Route, Bandra West, Mumbai, 400050' },
-                "loc03": { "city": 'Bengaluru, KA', "type": 'Technology Hub', "address": '789 Tech Park, Koramangala, Bengaluru, 560095' },
+                "loc03": { "city": 'Bengaluru, KA', "type": 'Technology Hub', "address": '789 Tech Park, Koramagala, Bengaluru, 560095' },
                 "loc04": { "city": 'Coimbatore, TN', "type": 'Sourcing & Operations', "address": '101 Cotton Avenue, Gandhipuram, Coimbatore, 641012' },
                 "loc05": { "city": 'New York, USA', "type": 'International Office', "address": '5th Avenue, New York, NY 10016, United States' },
                 "loc06": { "city": 'London, UK', "type": 'European Showroom', "address": 'Regent Street, London W1B 5AP, United Kingdom' }
@@ -106,6 +134,8 @@ def setup_careers_database():
 def upload_video_to_r2(video_file, user_name, return_id):
     if not video_file:
         return None, "No video file provided."
+    if not s3_client:
+        return None, "S3 client is not configured."
     user_name_safe = re.sub(r'[^a-zA-Z0-9_-]', '_', user_name)
     object_key = f"{user_name_safe}/{return_id}/{return_id}_verification.mp4"
     try:
@@ -127,9 +157,9 @@ def upload_video_to_r2(video_file, user_name, return_id):
 def upload_resume_to_r2(resume_file, application_id):
     if not resume_file:
         return None, "No resume file provided."
-
+    if not s3_client:
+        return None, "S3 client is not configured."
     object_key = f"job_applications/{application_id}/{application_id}_resume.pdf"
-
     try:
         s3_client.upload_fileobj(
             resume_file,
@@ -150,9 +180,9 @@ def delete_resume_from_r2(application_id):
     """Deletes a resume file from Cloudflare R2 based on the application ID."""
     if not application_id:
         return False, "Application ID not provided."
-    
+    if not s3_client:
+        return False, "S3 client is not configured."
     object_key = f"job_applications/{application_id}/{application_id}_resume.pdf"
-    
     try:
         print(f"Attempting to delete {object_key} from R2 bucket {R2_BUCKET_NAME}...")
         s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=object_key)
@@ -270,8 +300,11 @@ def create_modern_invoice(order_data, user_data, path_or_buffer, title="Tax Invo
 
 # --- Email and Validation functions ---
 def send_otp_email(receiver_email, otp):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     msg = MIMEText(f"""<html><body style="font-family: Arial, sans-serif; color: #222;"><div style="max-width: 480px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px 24px; background: #f9f9f9;"><h2 style="color: #00bcd4; margin-top: 0;">NILA Products Portal - OTP Verification</h2><p>Dear User,</p><p>We received a request to sign up or log in to your NILA Products account.</p><p style="font-size: 1.1em; margin: 24px 0;"><strong>Your One-Time Password (OTP) is:</strong><span style="display: inline-block; background: #e3f7fa; color: #00bcd4; font-size: 1.5em; letter-spacing: 4px; padding: 10px 24px; border-radius: 8px; margin-left: 10px;">{otp}</span></p><p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone.</p><p>If you did not request this, you can safely ignore this email.</p><br><p style="color: #888; font-size: 0.95em;">Thank you,<br>NILA Products Team</p></div></body></html>""", "html")
     msg['Subject'] = 'Your NILA OTP Code'
     msg['From'] = sender_email
@@ -287,8 +320,11 @@ def send_otp_email(receiver_email, otp):
         return False
         
 def send_account_created_email(receiver_email, name):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     msg = MIMEText(f"""<html><body style="font-family: Arial, sans-serif; color: #222;"><div style="max-width: 480px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px 24px; background: #f9f9f9;"><h2 style="color: #00bcd4; margin-top: 0;">🎉 Welcome to NILA Products!</h2><p>Dear <strong>{name}</strong>,</p><p>We are thrilled to let you know that your <b>NILA Products</b> account has been <span style="color:#00bcd4;font-weight:bold;">successfully created</span>!</p><ul style="margin: 18px 0 18px 1.2em; color: #444;"><li>Your <b>email</b> is your username for secure access.</li><li>Your <b>phone number</b> is linked for account recovery and notifications.</li><li>Enjoy seamless access to our textile commerce platform.</li></ul><p style="margin: 18px 0; color: #388e3c;"><b>✨ Explore, connect, and grow with NILA Products!</b></p><div style="margin: 24px 0; padding: 16px; background: #e3f7fa; border-radius: 8px; color: #00bcd4;"><b>Security Tip:</b> Never share your password or OTP with anyone.<br>For help, contact us at <a href="mailto:support@nilaproducts.com">support@nilaproducts.com</a>.</div><p style="color: #888; font-size: 0.95em;">Thank you for joining us,<br><strong>NILA Products Team</strong></p><div style="margin-top:18px;text-align:center;"><img src="https://img.icons8.com/color/96/000000/checked-2--v2.png" alt="Success" width="48" height="48"/></div></div></body></html>""", "html")
     msg['Subject'] = '🎉 Your NILA Products Account is Ready!'
     msg['From'] = sender_email
@@ -304,8 +340,11 @@ def send_account_created_email(receiver_email, name):
         return False
 
 def send_order_confirmation_email(receiver_email, name, order_data):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     items_html = ""
     total_base_amount = 0.0
     for item in order_data['items']:
@@ -333,8 +372,11 @@ def send_order_confirmation_email(receiver_email, name, order_data):
         return False
 
 def send_application_confirmation_email(receiver_email, name, application_data, job_details):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     job_title = job_details.get('title', 'N/A')
     job_location = job_details.get('location', 'N/A')
     application_id = application_data.get('applicationId', 'N/A')
@@ -355,8 +397,11 @@ def send_application_confirmation_email(receiver_email, name, application_data, 
         return False
 
 def send_return_request_email(receiver_email, name, order_data):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     order_id = order_data.get('orderId', 'N/A')
     return_id = order_data.get('returnInvoiceId', 'N/A')
     reason = order_data.get('returnDetails', {}).get('reason', 'N/A')
@@ -377,8 +422,11 @@ def send_return_request_email(receiver_email, name, order_data):
         return False
 
 def send_stock_notification_email(receiver_email, name, restocked_products):
-    sender_email = "bharathvk1889@gmail.com"
-    sender_password = "vlwx hzuq nnvn efkf"
+    sender_email = GMAIL_SENDER_EMAIL
+    sender_password = GMAIL_SENDER_PASSWORD
+    if not all([sender_email, sender_password]):
+        print("⚠️ Email credentials are not configured in environment.")
+        return False
     
     product_list_html = ""
     for product in restocked_products:
@@ -920,7 +968,7 @@ def place_order():
             stock_updates[f'{product_id}/availableStock'] = product_in_db['availableStock'] - quantity
 
         if not order_items_details:
-             return jsonify({'success': False, 'error': 'All items in your cart are out of stock.'}), 400
+            return jsonify({'success': False, 'error': 'All items in your cart are out of stock.'}), 400
 
         order_id = generate_unique_id('ORD', 'orders')
         invoice_id = generate_unique_id('INV', 'invoices')
@@ -1157,7 +1205,7 @@ def download_return_invoice(order_id):
         order_data = user_ref.child(f'order_details/order_history/{order_id}').get()
         if not user_data or not order_data: return "Order not found.", 404
         if 'returnInvoiceId' not in order_data or order_data.get('status') not in ['Return Requested', 'Returned']:
-             return "No return invoice exists for this order.", 404
+            return "No return invoice exists for this order.", 404
         buffer = io.BytesIO()
         create_modern_invoice(order_data, user_data, buffer, title="Return Invoice")
         buffer.seek(0)
