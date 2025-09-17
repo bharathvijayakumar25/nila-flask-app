@@ -1,0 +1,6 @@
+kf6ys-1-UsKza7ebf8hrcuZk-a-N4utMwiThZltH
+account id : 6991a8c34f6392f9f8e53363fd3f1639
+endpoint_url : https://6991a8c34f6392f9f8e53363fd3f1639.r2.cloudflarestorage.com
+access_key_id : 060f4cdb48cb4329960edb859375a420
+secret_access_key : cc4e70de5f7010ab2a8f4ff9be17beb00ca29b26cf3a36f1f3551fb6cbfe93a7
+https://6991a8c34f6392f9f8e53363fd3f1639.r2.cloudflarestorage.com

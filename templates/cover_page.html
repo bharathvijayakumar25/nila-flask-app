@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nila Products - The Future of Textiles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B5CF6;
+            --secondary-color: #06B6D4;
+            --accent-color: #F59E0B;
+            --bg-color: #FAFBFC;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(139, 92, 246, 0.15);
+            --shadow-light: rgba(139, 92, 246, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.05);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-text: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            --header-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Ultra Modern Background Effects --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+            z-index: -2;
+            animation: backgroundShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes backgroundShift {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        #cursor-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.2s ease-out;
+        }
+        
+        /* --- General Layout --- */
+        .container {
+            width: min(90%, 1400px);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* --- Header & Navigation --- */
+        .main-header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.04);
+            transition: var(--transition-fast);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        #live-clock {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+            background: rgba(139, 92, 246, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            font-family: 'Inter', monospace;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand i {
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .login-btn {
+            background: var(--gradient-bg);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: var(--transition-fast);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: var(--transition-fast);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .menu-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .menu-bar {
+            position: sticky;
+            top: var(--header-height);
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .menu-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .menu-link {
+            background: transparent;
+            border: 2px solid transparent;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--gradient-bg);
+            transition: var(--transition-fast);
+            z-index: -1;
+            border-radius: 50px;
+        }
+        
+        .menu-link.active, .menu-link:hover {
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .menu-link.active::before, .menu-link:hover::before {
+            width: 100%;
+        }
+
+        .explore-collections-btn {
+            background: var(--gradient-bg);
+            color: white !important;
+            font-weight: 600;
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .explore-collections-btn::before {
+            width: 100%;
+        }
+
+        /* --- Sections Logic --- */
+        .main-section {
+            display: none;
+            padding-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+            animation: fadeInUp 0.8s var(--transition-slow);
+        }
+        .main-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Ultra Modern Hero Section --- */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - var(--header-height) - 80px);
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .hero-container {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 4rem;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero-content {
+            z-index: 2;
+        }
+
+        .hero-content .subtitle {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+        }
+
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-dark), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-light);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-btn-primary {
+            background: var(--gradient-bg);
+            color: white;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+        }
+
+        .hero-btn-secondary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .hero-visual {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-pattern {
+            width: 100%;
+            max-width: 600px;
+            height: 600px;
+            background: conic-gradient(from 0deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2), rgba(245, 158, 11, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+            position: relative;
+        }
+
+        .hero-pattern::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 80%;
+            background: var(--bg-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: var(--gradient-bg);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+        }
+
+        .floating-element:nth-child(1) { width: 60px; height: 60px; top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 40px; height: 40px; top: 60%; right: 20%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { width: 80px; height: 80px; bottom: 20%; left: 20%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(30px) rotate(240deg); }
+        }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- Collections Scroller --- */
+        .collections-container {
+            width: 100vw;
+            padding: 4rem 0;
+            overflow: hidden;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(6, 182, 212, 0.05));
+        }
+        
+        .collections-container:hover .collections-track { animation-play-state: paused; }
+
+        .collections-track {
+            display: flex;
+            gap: 2rem;
+            width: fit-content;
+            animation: scrollX 40s linear infinite;
+            padding: 0 2rem;
+        }
+
+        @keyframes scrollX {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        .collection-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 24px;
+            width: clamp(280px, 70vw, 320px);
+            padding: 1.5rem;
+            flex-shrink: 0;
+            transition: var(--transition-slow);
+            cursor: pointer;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .collection-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: var(--transition-fast);
+        }
+
+        .collection-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+        }
+
+        .collection-card:hover::before { left: 100%; }
+        .collection-card img { width: 100%; height: 220px; object-fit: cover; border-radius: 16px; margin-bottom: 1.5rem; }
+        .collection-card .name { font-size: 1.25rem; font-weight: 600; background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 0.5rem; }
+        .collection-card .desc { font-size: 0.925rem; color: var(--text-light); line-height: 1.6; }
+        .loading-message { font-size: 1.5rem; font-weight: 600; background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; width: 100vw; text-align: center; }
+        
+        /* --- Content Sections --- */
+        .content-section { padding: 6rem 0; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 4rem; background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .section-content { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(139, 92, 246, 0.1); padding: 3rem; border-radius: 24px; margin-bottom: 3rem; font-size: 1.125rem; line-height: 1.8; color: var(--text-light); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06); }
+        .section-content p b { color: var(--text-dark); font-weight: 600; }
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .info-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 2rem; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.1); transition: var(--transition-slow); position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); }
+        .info-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--gradient-bg); transform: scaleX(0); transition: var(--transition-fast); }
+        .info-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15); }
+        .info-card:hover::before { transform: scaleX(1); }
+        .info-card h4 { background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600; }
+        .info-card p { font-size: 1rem; }
+        .info-card strong { background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 600; }
+
+        /* --- Footer --- */
+        footer { background: linear-gradient(135deg, var(--text-dark), #374151); color: white; text-align: center; padding: 3rem 0; margin-top: 4rem; }
+        footer p { margin-bottom: 0.5rem; opacity: 0.9; }
+
+        /* --- RESPONSIVE MODIFICATIONS --- */
+        @media (max-width: 1024px) {
+            .hero-container { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+            .hero-content p { margin: 0 auto 2.5rem auto; }
+            .hero-visual { order: -1; }
+            .hero-pattern { max-width: 400px; height: 400px; }
+            .hero-actions { justify-content: center; }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-bar { border-bottom: none; }
+            .menu-bar.active { border-bottom: 1px solid var(--border-color); }
+            .menu-content { position: absolute; top: 100%; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); flex-direction: column; align-items: stretch; text-align: center; gap: 0; max-height: 0; overflow: hidden; padding: 0; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
+            .menu-bar.active .menu-content { max-height: 500px; padding: 1rem 0; }
+            .menu-link { border-radius: 0; padding: 1.25rem; margin: 0; border-bottom: 1px solid rgba(139, 92, 246, 0.1); }
+            .menu-link:last-child { border-bottom: none; }
+            .brand { font-size: 1.5rem; }
+            #live-clock { display: none; }
+            .hero-section { padding: 2rem 0; }
+            .section-title { font-size: 2rem; }
+            .section-content { padding: 2rem; }
+            .hero-btn { flex: 1; min-width: 200px; }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-pattern { max-width: 300px; height: 300px; }
+            .floating-element { display: none; }
+            .section-content { padding: 1.5rem; }
+            .info-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-glow"></div>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <div id="live-clock"></div>
+                    <div class="brand">
+                        <i class="fas fa-gem"></i>
+                        NILA PRODUCTS
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="menu-bar">
+        <div class="container">
+            <div class="menu-content">
+                <button class="menu-link active" data-section="home">Home</button>
+                <button class="menu-link" data-section="about">About</button>
+                <button class="menu-link" data-section="showrooms">Showrooms</button>
+                <button class="menu-link" data-section="companies">Group Companies</button>
+                <button class="menu-link explore-collections-btn" id="exploreBtn">
+                    Explore Collections <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="main-section active" id="home">
+            <div class="hero-section">
+                <div class="container">
+                    <div class="hero-container">
+                        <div class="hero-content">
+                            <div class="subtitle">Premium Textiles</div>
+                            <h1>The Fabric of Imagination. Woven for You.</h1>
+                            <p>Discover India's finest collection of sarees, dress materials, kurtis, and home linen. Where tradition meets innovation in every thread.</p>
+                            <div class="hero-actions">
+                                <button class="hero-btn hero-btn-primary" id="exploreHeroBtn">
+                                    <i class="fas fa-shopping-bag"></i> Shop Collections
+                                </button>
+                                <button class="hero-btn hero-btn-secondary">
+                                    <i class="fas fa-play"></i> Watch Story
+                                </button>
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <div class="hero-pattern"></div>
+                            <div class="floating-elements">
+                                <div class="floating-element"></div>
+                                <div class="floating-element"></div>
+                                <div class="floating-element"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <section class="collections-container" id="collections">
+                <div class="collections-track" id="collectionsTrack">
+                </div>
+            </section>
+        </section>
+
+        <section class="main-section" id="about">
+            <div class="container content-section">
+                <div class="section-title">About Nila Products</div>
+                <div class="section-content">
+                    <p>
+                        <b>Nila Products</b> stands as India's premier textile e-commerce destination, curating an exquisite collection of sarees, dress materials, kurtis, and home linen. We masterfully blend centuries-old traditions with contemporary design sensibilities, delivering unparalleled quality and style directly to your doorstep. Our mission transcends mere commerce – we empower textile businesses and enthusiasts through seamless digital experiences that honor craft and celebrate culture.
+                    </p>
+                    <div class="content-grid">
+                        <div class="info-card">
+                            <h4><i class="fas fa-certificate"></i> Authentic Heritage</h4>
+                            <p>Meticulously handpicked textiles sourced from master weavers and renowned mills across India, ensuring authenticity and superior craftsmanship in every piece.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-shipping-fast"></i> Express Delivery</h4>
+                            <p>Lightning-fast nationwide shipping with real-time tracking, hassle-free returns, and white-glove customer service that exceeds expectations.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-shield-alt"></i> Secure Experience</h4>
+                            <p>Bank-grade security for all transactions, comprehensive privacy protection, and dedicated customer support available 24/7 for your peace of mind.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="main-section" id="showrooms">
+            <div class="container content-section">
+                <div class="section-title">Our Showroom Network</div>
+                <div class="section-content">
+                    <p>Experience our collections in person at our flagship showrooms across South India. Our knowledgeable style consultants are ready to guide you through our curated selections and help you find the perfect textile treasures.</p>
+                    <div class="content-grid">
+                        <div class="info-card">
+                            <h4><i class="fas fa-map-marker-alt"></i> Chennai Flagship</h4>
+                            <p>
+                                <strong>Address:</strong> 123, Mount Road, Chennai - 600002<br>
+                                <strong>Hours:</strong> Mon-Sat: 10am - 8pm
+                            </p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-map-marker-alt"></i> Coimbatore Branch</h4>
+                            <p>
+                                <strong>Address:</strong> 45, Gandhipuram, Coimbatore - 641012<br>
+                                <strong>Hours:</strong> Mon-Sat: 10am - 8pm
+                            </p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-map-marker-alt"></i> Madurai Branch</h4>
+                            <p>
+                                <strong>Address:</strong> 78, Anna Nagar, Madurai - 625020<br>
+                                <strong>Hours:</strong> Mon-Sat: 10am - 8pm
+                            </p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-map-marker-alt"></i> Trichy Branch</h4>
+                            <p>
+                                <strong>Address:</strong> 12, Rockfort, Trichy - 620002<br>
+                                <strong>Hours:</strong> Mon-Sat: 10am - 8pm
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="main-section" id="companies">
+            <div class="container content-section">
+                <div class="section-title">Our Group Companies</div>
+                 <div class="section-content">
+                    <p>Our commitment to textiles extends beyond retail through our specialized group companies, each a leader in its respective domain.</p>
+                    <div class="content-grid">
+                        <div class="info-card">
+                            <h4><i class="fas fa-globe-americas"></i> Nila Exports</h4>
+                            <p>Exporting the finest Indian textiles and garments to over 30 countries, connecting global fashion with local craftsmanship.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-couch"></i> Nila Home</h4>
+                            <p>Crafting premium home linen and furnishings that bring elegance, comfort, and a touch of modern Indian artistry to contemporary homes.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-cut"></i> Nila Fabrics</h4>
+                            <p>The trusted wholesale fabric supplier for leading boutiques and designers across the nation, offering an unparalleled selection of quality materials.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Nila Products. All Rights Reserved. | Designed for the Future</p>
+        <p>Contact us: info@nilaproducts.com</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Live Cursor Glow Effect ---
+            const cursorGlow = document.getElementById('cursor-glow');
+            document.body.addEventListener('mousemove', (e) => {
+                requestAnimationFrame(() => {
+                    cursorGlow.style.opacity = '1';
+                    cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                });
+            });
+            document.body.addEventListener('mouseleave', () => cursorGlow.style.opacity = '0');
+            document.body.addEventListener('mouseenter', () => cursorGlow.style.opacity = '1');
+
+            // --- Live Clock ---
+            const clockElement = document.getElementById('live-clock');
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                if (clockElement) {
+                   clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+                }
+            }
+            if (clockElement) {
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
+
+            // --- Responsive Menu Toggle Logic ---
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuBar = document.querySelector('.menu-bar');
+            menuToggle.addEventListener('click', () => {
+                menuBar.classList.toggle('active');
+            });
+
+            // --- Menu Navigation Logic ---
+            const menuLinks = document.querySelectorAll('.menu-link');
+            const mainSections = document.querySelectorAll('.main-section');
+            menuLinks.forEach(link => {
+                if (!link.id.includes('explore')) {
+                    link.addEventListener('click', function() {
+                        menuLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const sectionId = this.getAttribute('data-section');
+                        mainSections.forEach(sec => {
+                            sec.classList.toggle('active', sec.id === sectionId);
+                        });
+                        
+                        if (sectionId !== 'home') {
+                             window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                        
+                        if (window.innerWidth <= 768) {
+                            menuBar.classList.remove('active');
+                        }
+                    });
+                }
+            });
+
+            // --- Explore Button Scroll Functionality ---
+            const exploreBtn = document.getElementById('exploreBtn');
+            const exploreHeroBtn = document.getElementById('exploreHeroBtn');
+            const collectionsSection = document.getElementById('collections');
+            
+            const exploreClickHandler = () => {
+                collectionsSection.scrollIntoView({ behavior: 'smooth' });
+                if (window.innerWidth <= 768) {
+                    menuBar.classList.remove('active');
+                }
+            };
+            
+            exploreBtn.addEventListener('click', exploreClickHandler);
+            exploreHeroBtn.addEventListener('click', exploreClickHandler);
+
+
+            // --- Redirect to Login ---
+            function redirectToLogin(e) {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            }
+            document.querySelector('.login-btn').addEventListener('click', redirectToLogin);
+
+            // --- Dynamic Collection Loading Logic ---
+            function fetchCollectionsFromBackend() {
+                console.log("Fetching latest collections from backend...");
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log("Backend returned no new collections.");
+                        resolve([]); 
+                    }, 2000); 
+                });
+            }
+            
+            async function loadCollections() {
+                const collectionsTrack = document.getElementById('collectionsTrack');
+                collectionsTrack.innerHTML = `<div class="loading-message">Curating the Latest Collections...</div>`;
+
+                try {
+                    const collections = await fetchCollectionsFromBackend();
+                    collectionsTrack.innerHTML = ''; // Clear loading message
+
+                    if (collections && collections.length > 0) {
+                        const duplicatedCollections = [...collections, ...collections]; 
+
+                        duplicatedCollections.forEach(collection => {
+                            const card = document.createElement('div');
+                            card.classList.add('collection-card');
+                            card.innerHTML = `
+                                <img src="${collection.image}" alt="${collection.name}">
+                                <div class="name">${collection.name}</div>
+                                <div class="desc">${collection.description}</div>
+                            `;
+                            card.addEventListener('click', redirectToLogin);
+                            collectionsTrack.appendChild(card);
+                        });
+                    } else {
+                        collectionsTrack.innerHTML = `<div class="loading-message">Stay Tuned. New Collections Arriving Soon!</div>`;
+                    }
+                } catch (error) {
+                    console.error("Error fetching collections:", error);
+                    collectionsTrack.innerHTML = `<div class="loading-message">Error: Could not load collections. Please try again later.</div>`;
+                }
+            }
+            
+            loadCollections();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nila Products - Login & Support</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B5CF6;
+            --secondary-color: #06B6D4;
+            --accent-color: #F59E0B;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --bg-color: #FAFBFC;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --text-lighter: #9CA3AF;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(139, 92, 246, 0.15);
+            --shadow-light: rgba(139, 92, 246, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.05);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-text: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            --gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(6, 182, 212, 0.05));
+            --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* --- Ultra Modern Background Effects --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.08) 0%, transparent 50%);
+            z-index: -2;
+            animation: backgroundShift 15s ease-in-out infinite alternate;
+        }
+        @keyframes backgroundShift {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.05); }
+        }
+        /* Floating geometric shapes */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 20%);
+            z-index: -1;
+            animation: floatShapes 20s ease-in-out infinite alternate;
+        }
+        @keyframes floatShapes {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(10deg); }
+        }
+        /* Glass morphism cursor effect */
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        /* --- Main Authentication Container --- */
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(139, 92, 246, 0.15),
+                0 8px 32px rgba(0, 0, 0, 0.06);
+            position: relative;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient-bg);
+        }
+        /* --- Tab Selector (Login/Complaints) --- */
+        .auth-selector {
+            display: flex;
+            background: var(--gradient-card);
+            position: relative;
+        }
+        .auth-selector::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: var(--gradient-bg);
+            transition: var(--transition-fast);
+            border-radius: 2px 2px 0 0;
+        }
+        .auth-selector.complaint-active::after {
+            left: 50%;
+        }
+        .selector-btn {
+            flex: 1;
+            padding: 1.25rem;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .selector-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: rgba(139, 92, 246, 0.05);
+            transition: var(--transition-fast);
+            z-index: -1;
+        }
+        .selector-btn:hover::before {
+            width: 100%;
+        }
+        .selector-btn.active {
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+        .selector-btn i {
+            font-size: 1.1rem;
+        }
+        /* --- Content Panes --- */
+        .auth-content {
+            padding: 2.5rem;
+            position: relative;
+        }
+        .auth-view {
+            display: none;
+        }
+        .auth-view.active {
+            display: block;
+            animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeInScale {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.98);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        .auth-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+        .auth-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gradient-bg);
+            border-radius: 2px;
+        }
+        /* --- Form Elements --- */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: var(--transition-fast);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+        }
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--text-lighter);
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 
+                0 0 0 4px rgba(139, 92, 246, 0.1),
+                0 8px 25px rgba(139, 92, 246, 0.15);
+            transform: translateY(-2px);
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--gradient-bg);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: var(--transition-fast);
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4);
+        }
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+        }
+        .submit-btn:disabled::before {
+            display: none;
+        }
+        .signup-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--gradient-card);
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+        }
+        .signup-link-btn {
+            background: none;
+            border: none;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition-fast);
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .signup-link-btn:hover {
+            transform: translateY(-2px);
+        }
+        .signup-link-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient-bg);
+            transform: scaleX(0);
+            transition: var(--transition-fast);
+        }
+        .signup-link-btn:hover::after {
+            transform: scaleX(1);
+        }
+        /* --- Notification Area --- */
+        #message-area {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: white;
+            z-index: 1001;
+            font-weight: 600;
+            display: none;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        #message-area.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        #message-area.error {
+            background: linear-gradient(135deg, var(--error-color), #DC2626);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        /* --- Signup Modal --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin: 3% auto;
+            padding: 3rem;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 
+                0 25px 80px rgba(139, 92, 246, 0.2),
+                0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-bg);
+            border-radius: 24px 24px 0 0;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition-fast);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.1);
+        }
+        .close-modal:hover {
+            background: var(--gradient-bg);
+            color: white;
+            transform: rotate(90deg);
+        }
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .modal-step { 
+            display: none; 
+        }                
+        .modal-step.active { 
+            display: block;
+            animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-step p {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        /* --- Step Progress Indicator --- */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.2);
+            transition: var(--transition-fast);
+        }
+        .step-dot.active {
+            background: var(--gradient-bg);
+            transform: scale(1.2);
+        }
+        .step-dot.completed {
+            background: var(--success-color);
+        }
+        /* --- OTP Inputs --- */
+        .otp-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 2rem 0;
+        }
+        .otp-input {
+            width: 60px;
+            height: 70px;
+            font-size: 1.75rem;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            color: var(--primary-color);
+        }
+        .otp-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+        /* --- Select Styling --- */
+        select.form-input {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        /* --- Floating Elements --- */
+        .floating-decoration {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--gradient-bg);
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .floating-decoration:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+        .floating-decoration:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 5%;
+            animation-delay: 2s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        /* --- Responsiveness --- */
+        @media (max-width: 1024px) {
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+            }
+        }
+        @media (max-width: 768px) {
+            .auth-content {
+                padding: 2rem;
+            }
+            .auth-title {
+                font-size: 1.75rem;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 2rem;
+            }
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .selector-btn {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            .otp-input {
+                width: 50px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            .floating-decoration {
+                display: none;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .auth-container {
+                max-width: 100%;
+                margin: 0;
+            }
+            .auth-content {
+                padding: 1.5rem;
+            }
+            .auth-title {
+                font-size: 1.5rem;
+            }
+            .form-input, .form-textarea {
+                padding: 0.875rem 1rem;
+            }
+            .submit-btn {
+                padding: 0.875rem 1.5rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+                margin: 10% auto;
+            }
+            .otp-group {
+                gap: 8px;
+            }
+            .otp-input {
+                width: 45px;
+                height: 55px;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-glow"></div>
+    <div class="floating-decoration"></div>
+    <div class="floating-decoration"></div>
+    <div class="auth-container">
+        <div class="auth-selector">
+            <button id="select-login" class="selector-btn active" data-view="login-view">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button id="select-complaint" class="selector-btn" data-view="complaint-view">
+                <i class="fas fa-exclamation-circle"></i> Support
+            </button>
+        </div>
+        <div class="auth-content">
+            <div id="login-view" class="auth-view active">
+                <h2 class="auth-title">Welcome Back</h2>
+                <form id="initial-login-form">
+                    <div class="form-group">
+                        <label for="login-email"><i class="fas fa-envelope"></i> Email Address</label>
+                        <input type="email" id="login-email" class="form-input" required autocomplete="email" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-phone"><i class="fas fa-phone"></i> Phone Number</label>
+                        <input type="tel" id="login-phone" class="form-input" required autocomplete="tel" placeholder="Enter your phone number">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-arrow-right"></i> Continue with Login
+                    </button>
+                </form>
+                <form id="otp-login-form" style="display: none;">
+                    <div class="step-indicator">
+                        <div class="step-dot completed"></div>
+                        <div class="step-dot active"></div>
+                    </div>
+                    <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-light);">
+                        <i class="fas fa-paper-plane" style="color: var(--primary-color);"></i>
+                        We've sent a verification code to your email. Please enter it below.
+                    </p>
+                    <div class="form-group">
+                        <label for="login-otp"><i class="fas fa-key"></i> Verification Code</label>
+                        <input type="text" id="login-otp" class="form-input" maxlength="6" pattern="\d{6}" required placeholder="Enter 6-digit code">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-check"></i> Verify & Login
+                    </button>
+                </form>
+                <div class="signup-link">
+                    <p style="margin-bottom: 0.5rem; color: var(--text-light);">New to Nila Products?</p>
+                    <button id="open-signup-modal" class="signup-link-btn">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </div>
+            </div>
+            <div id="complaint-view" class="auth-view">
+                <h2 class="auth-title">Customer Support</h2>
+                <form id="complaint-form">
+                    <div class="form-group">
+                        <label for="complaint-email"><i class="fas fa-envelope"></i> Your Email</label>
+                        <input type="email" id="complaint-email" class="form-input" required placeholder="Enter your email address">
+                    </div>
+                    <div class="form-group">
+                        <label for="complaint-text"><i class="fas fa-comment-alt"></i> How can we help you?</label>
+                        <textarea id="complaint-text" class="form-textarea" required placeholder="Describe your issue or feedback in detail..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="auth-title">Join Nila Products</h2>
+            <div id="signup-steps-container">
+                <div id="signup-step-1" class="modal-step active">
+                    <div class="step-indicator">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot"></div>
+                        <div class="step-dot"></div>
+                    </div>
+                    <p><i class="fas fa-shield-alt" style="color: var(--primary-color);"></i> Let's secure your account with email and phone verification.</p>
+                    <div class="modal-form-grid">
+                        <div class="form-group">
+                            <label for="signup-email"><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="signup-email" class="form-input" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-phone"><i class="fas fa-phone"></i> Phone</label>
+                            <input type="tel" id="signup-phone" class="form-input" required placeholder="Enter phone number">
+                        </div>
+                    </div>
+                    <button type="button" id="signup-send-otp-btn" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Send Verification Code
+                    </button>
+                </div>
+                <div id="signup-step-2" class="modal-step">
+                    <div class="step-indicator">
+                        <div class="step-dot completed"></div>
+                        <div class="step-dot active"></div>
+                        <div class="step-dot"></div>
+                    </div>
+                    <p><i class="fas fa-key" style="color: var(--primary-color);"></i> Enter the verification code sent to your email.</p>
+                    <div class="form-group">
+                        <label for="signup-otp"><i class="fas fa-shield-check"></i> Verification Code</label>
+                        <input type="text" id="signup-otp" class="form-input" maxlength="6" pattern="\d{6}" required placeholder="Enter 6-digit code">
+                    </div>
+                    <button type="button" id="signup-verify-otp-btn" class="submit-btn">
+                        <i class="fas fa-check"></i> Verify Code
+                    </button>
+                </div>
+                <div id="signup-step-3" class="modal-step">
+                    <div class="step-indicator">
+                        <div class="step-dot completed"></div>
+                        <div class="step-dot completed"></div>
+                        <div class="step-dot active"></div>
+                    </div>
+                     <p><i class="fas fa-user-check" style="color: var(--primary-color);"></i> Great! Just a few more details to complete your profile.</p>
+                     <form id="signup-details-form">
+                        <div class="modal-form-grid">
+                            <div class="form-group">
+                                <label for="signup-name"><i class="fas fa-user"></i> Full Name</label>
+                                <input type="text" id="signup-name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-org"><i class="fas fa-building"></i> Organization</label>
+                                <input type="text" id="signup-org" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-country-code"><i class="fas fa-globe"></i> Country Code</label>
+                                <select id="signup-country-code" class="form-input">
+                                    <option value="+91" selected>+91 (India)</option>
+                                    </select>
+                            </div>
+                              <div class="form-group">
+                                <label for="signup-country"><i class="fas fa-flag"></i> Country</label>
+                                <input type="text" id="signup-country" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-state"><i class="fas fa-map"></i> State</label>
+                                <input type="text" id="signup-state" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-district"><i class="fas fa-city"></i> District</label>
+                                <input type="text" id="signup-district" class="form-input" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="signup-address"><i class="fas fa-map-marker-alt"></i> Address</label>
+                                <textarea id="signup-address" class="form-textarea" required></textarea>
+                            </div>
+                              <div class="form-group full-width">
+                                <label for="signup-pincode"><i class="fas fa-hashtag"></i> Pincode</label>
+                                <input type="text" id="signup-pincode" class="form-input" required>
+                            </div>
+                        </div>
+                        <button type="button" id="signup-register-btn" class="submit-btn">
+                            <i class="fas fa-check-circle"></i> Complete Registration
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-area"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selectors ---
+            const selectLoginBtn = document.getElementById('select-login');
+            const selectComplaintBtn = document.getElementById('select-complaint');
+            const authSelector = document.querySelector('.auth-selector');
+            const messageArea = document.getElementById('message-area');
+
+            // Login Forms
+            const initialLoginForm = document.getElementById('initial-login-form');
+            const otpLoginForm = document.getElementById('otp-login-form');
+            const loginEmailInput = document.getElementById('login-email');
+            const loginPhoneInput = document.getElementById('login-phone');
+            const loginOtpInput = document.getElementById('login-otp');
+
+            // Signup Modal
+            const signupModal = document.getElementById('signup-modal');
+            const openSignupBtn = document.getElementById('open-signup-modal');
+            const closeSignupBtn = document.querySelector('.close-modal');
+            const signupStepsContainer = document.getElementById('signup-steps-container');
+            const signupSteps = {
+                1: document.getElementById('signup-step-1'),
+                2: document.getElementById('signup-step-2'),
+                3: document.getElementById('signup-step-3'),
+            };
+            const signupSendOtpBtn = document.getElementById('signup-send-otp-btn');
+            const signupVerifyOtpBtn = document.getElementById('signup-verify-otp-btn');
+            const signupRegisterBtn = document.getElementById('signup-register-btn');
+
+            // Complaint Form
+            const complaintForm = document.getElementById('complaint-form');
+
+            // --- Cursor Glow Effect ---
+            const cursorGlow = document.querySelector('.cursor-glow');
+            document.body.addEventListener('mousemove', (e) => {
+                requestAnimationFrame(() => {
+                    cursorGlow.style.opacity = '1';
+                    cursorGlow.style.left = `${e.clientX}px`;
+                    cursorGlow.style.top = `${e.clientY}px`;
+                });
+            });
+            document.body.addEventListener('mouseleave', () => cursorGlow.style.opacity = '0');
+
+            // --- Helper Functions ---
+            const showMessage = (message, type = 'error') => {
+                messageArea.textContent = message;
+                messageArea.className = type;
+                messageArea.style.display = 'block';
+                setTimeout(() => {
+                    messageArea.style.display = 'none';
+                }, 4000);
+            };
+
+            const setLoading = (button, isLoading, originalText) => {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            };
+            
+            const switchSignupStep = (stepToShow) => {
+                 Object.values(signupSteps).forEach(step => step.classList.remove('active'));
+                 signupSteps[stepToShow].classList.add('active');
+
+                // Update the step indicator dots
+                const stepDots = document.querySelectorAll('#signup-modal .step-dot');
+                stepDots.forEach((dot, index) => {
+                    dot.classList.remove('active', 'completed');
+                    if ((index + 1) < stepToShow) {
+                        dot.classList.add('completed');
+                    } else if ((index + 1) === stepToShow) {
+                        dot.classList.add('active');
+                    }
+                });
+            };
+
+            // --- Tab Switching Logic ---
+            const switchView = (viewId) => {
+                document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(viewId).classList.add('active');
+                
+                document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('active'));
+                const activeButton = document.querySelector(`.selector-btn[data-view='${viewId}']`);
+                activeButton.classList.add('active');
+                
+                if (viewId === 'complaint-view') {
+                    authSelector.classList.add('complaint-active');
+                } else {
+                    authSelector.classList.remove('complaint-active');
+                }
+            };
+
+            selectLoginBtn.addEventListener('click', () => switchView('login-view'));
+            selectComplaintBtn.addEventListener('click', () => switchView('complaint-view'));
+
+            // --- Modal Logic ---
+            const showSignupModal = () => {
+                signupModal.style.display = 'block';
+                // Reset to step 1 every time it's opened
+                document.getElementById('signup-email').value = '';
+                document.getElementById('signup-phone').value = '';
+                document.getElementById('signup-otp').value = '';
+                document.getElementById('signup-details-form').reset();
+                switchSignupStep(1);
+            };
+            
+            const hideSignupModal = () => signupModal.style.display = 'none';
+            
+            openSignupBtn.addEventListener('click', showSignupModal);
+            closeSignupBtn.addEventListener('click', hideSignupModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === signupModal) hideSignupModal();
+            });
+
+            // --- API Handlers ---
+
+            // ## LOGIN FLOW ##
+            initialLoginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('.submit-btn');
+                setLoading(button, true, `<i class="fas fa-arrow-right"></i> Continue with Login`);
+
+                try {
+                    const response = await fetch('/login_check', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: loginEmailInput.value, phone: loginPhoneInput.value }),
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('OTP sent to your email!', 'success');
+                        initialLoginForm.style.display = 'none';
+                        otpLoginForm.style.display = 'block';
+                        loginOtpInput.focus();
+                    } else if (response.status === 404) {
+                        showMessage("Account doesn't exist. Please sign up.", 'error');
+                        showSignupModal();
+                    } else {
+                        showMessage(data.error || 'An error occurred.');
+                    }
+                } catch (err) {
+                    showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(button, false, `<i class="fas fa-arrow-right"></i> Continue with Login`);
+                }
+            });
+
+            otpLoginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('.submit-btn');
+                setLoading(button, true, `<i class="fas fa-check"></i> Verify & Login`);
+                
+                try {
+                    const response = await fetch('/verify_login_otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ otp: loginOtpInput.value }),
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.redirect_url && data.token) {
+                        showMessage('Login successful! Redirecting...', 'success');
+                        sessionStorage.setItem('firebaseToken', data.token);
+                        window.location.href = data.redirect_url; 
+                    } else {
+                        showMessage(data.error || 'Invalid OTP or login failed.');
+                    }
+                } catch(err) {
+                    showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(button, false, `<i class="fas fa-check"></i> Verify & Login`);
+                }
+            });
+
+            // ## SIGNUP FLOW ##
+            
+            signupSendOtpBtn.addEventListener('click', async () => {
+                const originalText = `<i class="fas fa-paper-plane"></i> Send Verification Code`;
+                setLoading(signupSendOtpBtn, true, originalText);
+                try {
+                    const response = await fetch('/request_otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: document.getElementById('signup-email').value,
+                            phone: document.getElementById('signup-phone').value,
+                        }),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showMessage('OTP sent successfully!', 'success');
+                        switchSignupStep(2);
+                        document.getElementById('signup-otp').focus();
+                    } else {
+                        showMessage(data.error || 'Could not send OTP.');
+                    }
+                } catch(err) {
+                        showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(signupSendOtpBtn, false, originalText);
+                }
+            });
+
+            signupVerifyOtpBtn.addEventListener('click', async () => {
+                const originalText = `<i class="fas fa-check"></i> Verify Code`;
+                setLoading(signupVerifyOtpBtn, true, originalText);
+                try {
+                    const response = await fetch('/verify_otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ otp: document.getElementById('signup-otp').value }),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showMessage('OTP Verified! Please complete your profile.', 'success');
+                        switchSignupStep(3);
+                    } else {
+                        showMessage(data.error || 'Invalid OTP.');
+                    }
+                } catch(err) {
+                    showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(signupVerifyOtpBtn, false, originalText);
+                }
+            });
+
+            signupRegisterBtn.addEventListener('click', async () => {
+                const originalText = `<i class="fas fa-check-circle"></i> Complete Registration`;
+                setLoading(signupRegisterBtn, true, originalText);
+                try {
+                    const userData = {
+                        name: document.getElementById('signup-name').value,
+                        organization: document.getElementById('signup-org').value,
+                        country: document.getElementById('signup-country').value,
+                        state: document.getElementById('signup-state').value,
+                        district: document.getElementById('signup-district').value,
+                        address: document.getElementById('signup-address').value,
+                        pincode: document.getElementById('signup-pincode').value,
+                   };
+                    const response = await fetch('/save_user_data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showMessage('Registration successful! You can now log in.', 'success');
+                        hideSignupModal();
+                        loginEmailInput.value = document.getElementById('signup-email').value;
+                        loginPhoneInput.value = document.getElementById('signup-phone').value;
+                    } else {
+                          showMessage(data.error || 'Failed to save profile.');
+                    }
+                } catch(err) {
+                    showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(signupRegisterBtn, false, originalText);
+                }
+            });
+
+            // ## COMPLAINTS FLOW ##
+            complaintForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('.submit-btn');
+                const originalText = `<i class="fas fa-paper-plane"></i> Send Message`;
+                setLoading(button, true, originalText);
+                try {
+                    // This is a placeholder. You would need to create a '/submit_complaint' endpoint.
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network request
+                    
+                    showMessage('Message sent successfully! We will get back to you shortly.', 'success');
+                    complaintForm.reset();
+                    
+                } catch(err) {
+                    showMessage('Network error. Please try again.');
+                } finally {
+                    setLoading(button, false, originalText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

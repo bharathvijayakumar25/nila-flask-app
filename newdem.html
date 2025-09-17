@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nila Products - Textile E-Commerce</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffb300;
+            --secondary-color: #ff4081;
+            --accent: #00e676;
+            --text-color: #23272f;
+            --bg-color: #f9f5f0;
+            --card-bg: #fff;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --button-bg: #ffb300;
+            --button-text: #23272f;
+            --transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            --shadow: 0 8px 32px 0 rgba(34, 34, 34, 0.12);
+            --glass: rgba(255,255,255,0.25);
+        }
+        .dark-mode {
+            --primary-color: #ffe066;
+            --secondary-color: #ff4081;
+            --accent: #00e676;
+            --text-color: #ffe066;
+            --bg-color: #181c24;
+            --card-bg: #23272f;
+            --nav-bg: rgba(30, 30, 30, 0.9);
+            --button-bg: #ffe066;
+            --button-text: #181c24;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+            --glass: rgba(24,28,36,0.45);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, #e3eafc 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(ellipse at 50% 30%, #23272f 0%, #181c24 100%);
+            opacity: 0.18;
+            z-index: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #181c24 0%, #23272f 100%);
+        }
+        body.dark-mode::before {
+            opacity: 0.7;
+        }
+        /* Fireflies */
+        .firefly {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700;
+            animation: fly 18s linear infinite;
+            opacity: 0.7;
+            z-index: 1;
+        }
+        @keyframes fly {
+            0% { transform: translateY(0) scale(1);}
+            50% { transform: translateY(-40px) scale(1.2);}
+            100% { transform: translateY(0) scale(1);}
+        }
+        /* Header */
+        .main-header {
+            width: 100%;
+            background: var(--nav-bg);
+            box-shadow: 0 2px 12px #0001;
+            padding: 0.7rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        .main-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+            font-family: 'Montserrat', Arial, sans-serif;
+            margin-left: 2vw;
+        }
+        .main-header .brand i {
+            font-size: 2.2rem;
+            color: var(--secondary-color);
+        }
+        .main-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-right: 2vw;
+        }
+        .main-header .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.7rem;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: color 0.3s;
+        }
+        .main-header .login-btn {
+            background: linear-gradient(90deg, var(--primary-color) 60%, var(--secondary-color) 100%);
+            color: #fff;
+            border: none;
+            padding: 0.7rem 1.7rem;
+            border-radius: 2em;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.08rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px #0002;
+            letter-spacing: 1px;
+        }
+        .main-header .login-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            background: linear-gradient(90deg, var(--secondary-color) 60%, var(--primary-color) 100%);
+        }
+        /* Menu Bar */
+        .menu-bar {
+            width: 100%;
+            background: var(--card-bg);
+            box-shadow: 0 2px 12px #0001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2vw;
+            padding: 0.6rem 0;
+            z-index: 99;
+            position: sticky;
+            top: 62px;
+        }
+        .menu-link {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.13rem;
+            font-weight: 600;
+            padding: 0.7em 1.2em;
+            border-radius: 1.5em;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
+            outline: none;
+            letter-spacing: 1px;
+        }
+        .menu-link.active, .menu-link:hover {
+            background: var(--primary-color);
+            color: #181c24;
+            transform: scale(1.05);
+        }
+        /* Hide all sections by default */
+        .main-section {
+            display: none;
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        .main-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        /* Hero Banner */
+        .hero-banner {
+            width: 100%;
+            min-height: 60vh;
+            background: linear-gradient(120deg, var(--primary-color) 60%, var(--secondary-color) 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4vw 6vw 2vw 6vw;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+        }
+        .hero-content h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 1.2rem;
+            letter-spacing: 2px;
+            line-height: 1.1;
+            text-shadow: 0 2px 12px #0002;
+        }
+        .hero-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: #fffde4;
+            line-height: 1.6;
+        }
+        .hero-content .explore-btn {
+            background: #fff;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 2em;
+            padding: 0.8em 2.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 12px 0 #0008;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+            letter-spacing: 1px;
+        }
+        .hero-content .explore-btn:hover {
+            background: var(--secondary-color);
+            color: #fff;
+            transform: scale(1.07);
+        }
+        .hero-banner .hero-img {
+            width: 420px;
+            max-width: 40vw;
+            min-width: 220px;
+            z-index: 1;
+            animation: floatImg 3s ease-in-out infinite alternate;
+        }
+        @keyframes floatImg {
+            0% { transform: translateY(0);}
+            100% { transform: translateY(-18px);}
+        }
+        /* Horizontal Scroller for Collections */
+        .collections-scroller {
+            width: 100vw;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 2.5rem 0 2rem 0;
+            background: var(--bg-color);
+            position: relative;
+            box-shadow: 0 2px 12px #0001;
+        }
+        .collections-track {
+            display: flex;
+            gap: 2.5rem;
+            padding: 0 4vw;
+            min-width: 900px; /* Ensures minimum width for scrolling effect */
+            align-items: stretch;
+            /* Animation applied via JS for better control after data load */
+        }
+
+        .collections-track.loading-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px; /* Adjust as needed */
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            flex-grow: 1;
+            padding: 0;
+            min-width: unset; /* Override for loading message */
+        }
+
+        @keyframes scrollX {
+            0% { transform: translateX(0);}
+            100% { transform: translateX(-50%);}
+        }
+        .collection-card {
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px 0 #0002;
+            min-width: 320px;
+            max-width: 340px;
+            flex: 0 0 320px;
+            color: var(--text-color);
+            font-size: 1.05rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.3s;
+            cursor: pointer; /* Indicate clickable without a button */
+        }
+        .collection-card:hover {
+            box-shadow: 0 8px 32px 0 var(--secondary-color);
+            transform: scale(1.04) translateY(-8px);
+        }
+        .collection-card img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 0.7rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px #0008;
+            background: #181c24;
+        }
+        .collection-card .badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--secondary-color);
+            color: #fff;
+            font-size: 0.85em;
+            font-weight: 700;
+            padding: 0.3em 1em;
+            border-radius: 1em;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px #0006;
+        }
+        /* Section Titles */
+        .section-title {
+            font-size: 2rem;
+            margin: 2.5rem 0 1.2rem 2vw;
+            color: var(--primary-color);
+            font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: 1px;
+        }
+        /* About, Locations, Services */
+        .section-content {
+            max-width: 1200px;
+            margin: 0 auto 2.5rem auto;
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px 0 #0002;
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+            color: var(--text-color);
+            font-size: 1.15rem;
+            line-height: 1.7;
+        }
+        .about-highlights, .locations-list, .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem 3vw;
+            margin-top: 1.5rem;
+        }
+        .highlight-card, .location-card, .service-card {
+            background: rgba(255, 176, 0, 0.09);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 8px #0001;
+            min-width: 220px;
+            max-width: 340px;
+            flex: 1 1 220px;
+        }
+        .highlight-card:hover, .location-card:hover, .service-card:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.09);
+            background: var(--secondary-color);
+            color: #fff;
+        }
+        .highlight-card h4, .location-card h4, .service-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.18rem;
+        }
+        .location-card strong {
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+        /* Responsive Design */
+        @media (max-width: 1100px) {
+            .hero-banner { flex-direction: column; text-align: center; padding: 4vw 2vw 2vw 2vw;}
+            .hero-banner .hero-img { margin-top: 2rem;}
+            .collections-track { padding: 0 1vw;}
+            .section-content { padding: 1.2rem 0.7rem;}
+        }
+        @media (max-width: 700px) {
+            .main-header .brand { font-size: 1.3rem; margin-left: 1vw;}
+            .main-header .header-actions { margin-right: 1vw;}
+            .hero-banner { flex-direction: column; padding: 2vw 1vw;}
+            .hero-banner .hero-img { max-width: 80vw;}
+            .collections-track { gap: 1.2rem;}
+            .section-title { font-size: 1.3rem; margin: 2rem 0 1rem 1vw;}
+        }
+        @media (max-width: 500px) {
+            .hero-content h1 { font-size: 1.5rem;}
+            .collections-track { min-width: 600px;}
+            .collection-card { min-width: 180px; max-width: 200px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="firefly" style="left:10vw; top:20vh; animation-delay:0s;"></div>
+    <div class="firefly" style="left:80vw; top:30vh; animation-delay:2s;"></div>
+    <div class="firefly" style="left:50vw; top:70vh; animation-delay:4s;"></div>
+    <div class="firefly" style="left:30vw; top:40vh; animation-delay:1s;"></div>
+    <div class="firefly" style="left:60vw; top:10vh; animation-delay:3s;"></div>
+    <div class="firefly" style="left:20vw; top:80vh; animation-delay:5s;"></div>
+    <div class="firefly" style="left:90vw; top:60vh; animation-delay:6s;"></div>
+    <div class="firefly" style="left:70vw; top:50vh; animation-delay:7s;"></div>
+
+    <header class="main-header">
+        <div class="brand">
+            <i class="fas fa-tshirt"></i> NILA PRODUCTS
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">🌙</button>
+            <button class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </div>
+    </header>
+
+    <nav class="menu-bar">
+        <button class="menu-link active" data-section="home">Home</button>
+        <button class="menu-link" data-section="about">About</button>
+        <button class="menu-link" data-section="showrooms">Our Showroom Locations</button>
+        <button class="menu-link" data-section="companies">Our Other Companies</button>
+    </nav>
+
+    <main>
+        <section class="main-section active" id="home">
+            <section class="hero-banner">
+                <div class="hero-content">
+                    <h1>Discover the World of Textiles<br>with <span style="color:var(--secondary-color)">Nila Products</span></h1>
+                    <p>
+                        India's trusted textile e-commerce platform for sarees, dress materials, kurtis, home linen, and more.<br>
+                        Shop the latest collections, enjoy exclusive offers, and experience seamless delivery.
+                    </p>
+                    <button class="explore-btn" onclick="document.getElementById('collections').scrollIntoView({behavior:'smooth'})">
+                        Explore New Collections <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <img class="hero-img" src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80" alt="Textile Banner">
+            </section>
+
+            <section class="collections-scroller" id="collections">
+                <div class="section-title" style="margin-bottom:0.5rem;">Latest Collections <i class="fas fa-star" style="color:var(--secondary-color)"></i></div>
+                <div class="collections-track" id="collectionsTrack">
+                    <div class="loading-message">Waiting for server...</div>
+                </div>
+            </section>
+        </section>
+
+        <section class="main-section" id="about">
+            <div class="section-title">About Nila Products</div>
+            <section class="section-content">
+                <p>
+                    <b>Nila Products</b> is India's trusted textile e-commerce platform, offering a wide range of sarees, dress materials, kurtis, home linen, and more. We blend tradition with modernity, delivering quality and style to your doorstep. Our mission is to empower textile businesses and enthusiasts by providing seamless online and offline experiences.
+                </p>
+                <div class="about-highlights">
+                    <div class="highlight-card">
+                        <h4>Authentic Fabrics</h4>
+                        <p>Handpicked, quality-checked, and sourced from the best weavers and mills across India.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <h4>Fast Delivery</h4>
+                        <p>Lightning-fast shipping and easy returns, with real-time order tracking.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <h4>Secure Shopping</h4>
+                        <p>100% secure payments, privacy protection, and dedicated customer support.</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section class="main-section" id="showrooms">
+            <div class="section-title">Our Showroom Locations</div>
+            <section class="section-content">
+                <div class="locations-list">
+                    <div class="location-card">
+                        <strong>Chennai Main Showroom</strong><br>
+                        123, Mount Road, Chennai - 600002<br>
+                        <span style="color:#aaa;">Mon-Sat: 10am - 8pm</span>
+                    </div>
+                    <div class="location-card">
+                        <strong>Coimbatore Branch</strong><br>
+                        45, Gandhipuram, Coimbatore - 641012<br>
+                        <span style="color:#aaa;">Mon-Sat: 10am - 8pm</span>
+                    </div>
+                    <div class="location-card">
+                        <strong>Madurai Branch</strong><br>
+                        78, Anna Nagar, Madurai - 625020<br>
+                        <span style="color:#aaa;">Mon-Sat: 10am - 8pm</span>
+                    </div>
+                    <div class="location-card">
+                        <strong>Trichy Branch</strong><br>
+                        12, Rockfort, Trichy - 620002<br>
+                        <span style="color:#aaa;">Mon-Sat: 10am - 8pm</span>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section class="main-section" id="companies">
+            <div class="section-title">Our Other Companies</div>
+            <section class="section-content">
+                <div class="about-highlights">
+                    <div class="highlight-card">
+                        <h4>Nila Exports</h4>
+                        <p>Exporting Indian textiles and garments to over 30 countries worldwide.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <h4>Nila Home</h4>
+                        <p>Premium home linen and furnishings for modern Indian homes.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <h4>Nila Fabrics</h4>
+                        <p>Wholesale fabric supply for boutiques and designers.</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer style="background:rgba(10,10,26,0.8);padding:2rem;text-align:center;border-top:1px solid rgba(255,255,255,0.1);margin-top:2rem;color:#fff;">
+        <p>&copy; 2025 Nila Products. All rights reserved. | India's Textile Marketplace</p>
+        <p>📧 info@nilaproducts.com | 🌐 www.nilaproducts.com</p>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Menu navigation logic
+        const menuLinks = document.querySelectorAll('.menu-link');
+        const mainSections = document.querySelectorAll('.main-section');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                menuLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                const sectionId = this.getAttribute('data-section');
+                mainSections.forEach(sec => {
+                    if (sec.id === sectionId) {
+                        sec.classList.add('active');
+                    } else {
+                        sec.classList.remove('active');
+                    }
+                });
+                // Scroll to top of content area
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            });
+        });
+
+        // Function to redirect all relevant buttons to login.html
+        function redirectToLogin(e) {
+            e.preventDefault(); // Prevent default button behavior
+            window.location.href = 'login.html';
+        }
+
+        // Apply click listener to login and hero explore buttons
+        document.querySelector('.main-header .login-btn').addEventListener('click', redirectToLogin);
+        document.querySelector('.hero-content .explore-btn').addEventListener('click', redirectToLogin);
+
+
+        // Dynamic Collection Loading and Horizontal Scroller
+        const collectionsTrack = document.getElementById('collectionsTrack');
+        let scrollAnimationId; // To store the requestAnimationFrame ID
+
+        async function fetchCollections() {
+            collectionsTrack.innerHTML = '<div class="loading-message">Waiting for server...</div>';
+            collectionsTrack.classList.add('loading-message'); // Add class for styling loading message
+            
+            // Clear any existing animation before loading new data
+            if (scrollAnimationId) {
+                cancelAnimationFrame(scrollAnimationId);
+                collectionsTrack.style.transform = ''; // Reset transform
+                collectionsTrack.classList.remove('scrolling-active'); // Remove animation class
+            }
+
+            try {
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 2000)); 
+                
+                // Replace with your actual backend API endpoint
+                const response = await fetch('/api/latest-collections'); 
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const collections = await response.json();
+
+                collectionsTrack.innerHTML = ''; // Clear loading message
+                collectionsTrack.classList.remove('loading-message'); // Remove loading message class
+
+                if (collections && collections.length > 0) {
+                    collections.forEach(collection => {
+                        const card = document.createElement('div');
+                        card.classList.add('collection-card');
+                        card.innerHTML = `
+                            ${collection.badge ? `<span class="badge">${collection.badge}</span>` : ''}
+                            <img src="${collection.image}" alt="${collection.name}">
+                            <div style="font-weight:700; color:var(--primary-color);margin-bottom:0.3em;">${collection.name}</div>
+                            <div>${collection.description}</div>
+                        `;
+                        // Attach click listener to the entire card
+                        card.addEventListener('click', redirectToLogin); 
+                        collectionsTrack.appendChild(card);
+                    });
+                    // Start animation only after data is loaded and cards are present
+                    startScrollerAnimation();
+                } else {
+                    collectionsTrack.innerHTML = '<div class="loading-message">No new collections available.</div>';
+                    collectionsTrack.classList.add('loading-message');
+                }
+            } catch (error) {
+                console.error('Error fetching collections:', error);
+                collectionsTrack.innerHTML = '<div class="loading-message">Failed to load collections. Please try again later.</div>';
+                collectionsTrack.classList.add('loading-message');
+            }
+        }
+
+        // Animation for horizontal scroller, now controlled dynamically
+        function startScrollerAnimation() {
+            let scrollAmount = 0;
+            // Duplicate the track content to create a seamless loop
+            // Only do this if there's actual content to duplicate
+            if (collectionsTrack.children.length > 0 && collectionsTrack.children[0].classList.contains('collection-card')) {
+                 // Check if children exist and are actual cards
+                const originalContent = collectionsTrack.innerHTML;
+                collectionsTrack.innerHTML += originalContent; // Duplicate content for seamless loop
+            } else {
+                // If there are no cards, no need to animate
+                return;
+            }
+
+            // Add a class to indicate active scrolling animation to apply CSS animation
+            collectionsTrack.classList.add('scrolling-active');
+            collectionsTrack.style.animation = 'scrollX 30s linear infinite';
+            
+            // Original JS animation for reference/alternative if CSS animation isn't preferred or needs complex logic:
+            /*
+            function animateScroller() {
+                // Ensure there's content to scroll
+                if (collectionsTrack.scrollWidth > collectionsTrack.offsetWidth) {
+                    scrollAmount += 0.5; // Adjust speed as needed
+                    // Reset scrollAmount when it reaches half the total width (due to content duplication)
+                    if (scrollAmount >= collectionsTrack.scrollWidth / 2) {
+                        scrollAmount = 0;
+                    }
+                    collectionsTrack.style.transform = `translateX(-${scrollAmount}px)`;
+                }
+                scrollAnimationId = requestAnimationFrame(animateScroller);
+            }
+            scrollAnimationId = requestAnimationFrame(animateScroller);
+            */
+        }
+
+        // Fetch collections on page load
+        document.addEventListener('DOMContentLoaded', fetchCollections);
+    </script>
+</body>
+</html>

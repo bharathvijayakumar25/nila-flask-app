@@ -1,0 +1,277 @@
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let allJobs = [];
+    let allLocations = [];
+    let currentUser = { name: 'Guest', email: '', applications: [] };
+
+    // --- Element References (Keep these as they are) ---
+    const jobSearchView = document.getElementById('job-search-view');
+    const contentView = document.getElementById('content-view');
+    const backBtn = document.getElementById('back-to-jobs-btn');
+    const navLinks = document.querySelectorAll('.main-nav a');
+    const listingsContainer = document.getElementById('job-listings-container');
+    const jobCountEl = document.getElementById('job-count');
+    const noJobsFoundEl = document.getElementById('no-jobs-found');
+    const keywordInput = document.getElementById('keyword-search');
+    const locationFilter = document.getElementById('location-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const typeFilter = document.getElementById('type-filter');
+    const profileIcon = document.getElementById('profile-icon');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    const profileNameEl = document.getElementById('profile-name');
+    const profileEmailEl = document.getElementById('profile-email');
+    const appCountEl = document.getElementById('app-count');
+    const applicationModal = document.getElementById('application-modal');
+    const applicationForm = document.getElementById('application-form');
+    const myApplicationsModal = document.getElementById('my-applications-modal');
+    const myApplicationsBtn = document.getElementById('my-applications-btn');
+
+    // --- NEW/CORRECTED DATA FETCHING FUNCTIONS ---
+
+    async function fetchUserDetails() {
+        try {
+            const response = await fetch('/get_user_info_for_careers');
+            const data = await response.json();
+            if (data.success && data.userInfo.email) {
+                currentUser.name = data.userInfo.name;
+                currentUser.email = data.userInfo.secondaryEmail;
+            } else {
+                 currentUser.name = 'Guest';
+                 currentUser.email = '';
+            }
+        } catch (e) {
+            console.error("Could not fetch user details", e);
+            currentUser.name = 'Guest';
+            currentUser.email = '';
+        }
+        updateProfileUI();
+    }
+
+    async function fetchUserApplications() {
+        if (!currentUser.email) { // Don't fetch if not logged in
+            currentUser.applications = [];
+            return;
+        }
+        try {
+            const response = await fetch('/get_user_applications');
+            const data = await response.json();
+            if (data.success) {
+                currentUser.applications = data.applications;
+            } else {
+                currentUser.applications = [];
+            }
+        } catch(e) {
+            console.error("Could not fetch user applications", e);
+            currentUser.applications = [];
+        }
+        updateProfileUI();
+    }
+
+    async function fetchJobs() {
+        try {
+            const response = await fetch('/get_jobs');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            if (data.success && data.jobs) {
+                allJobs = data.jobs.map(job => ({ ...job, id: job.id.toString() })); // Ensure ID is a string
+            } else {
+                throw new Error('Failed to parse jobs data from server.');
+            }
+        } catch (error) {
+            console.error("Failed to fetch jobs:", error);
+            jobCountEl.textContent = 'Could not load jobs.';
+        }
+    }
+
+    async function fetchLocations() {
+        try {
+            const response = await fetch('/get_locations');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            if (data.success && data.locations) {
+                allLocations = data.locations;
+            } else {
+                throw new Error('Failed to parse locations data from server.');
+            }
+        } catch (error) {
+            console.error("Failed to fetch locations:", error);
+        }
+    }
+
+    // --- CORRECTED SUBMISSION HANDLER ---
+
+    async function handleApplicationSubmit(event) {
+        event.preventDefault();
+        const submitBtn = document.getElementById('submit-application-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const formData = new FormData();
+        const job = allJobs.find(j => j.id == document.getElementById('apply-job-id').value);
+        
+        // Append all form fields
+        formData.append('jobId', job.id);
+        formData.append('jobTitle', job.title);
+        formData.append('name', document.getElementById('applicant-name').value);
+        formData.append('primaryEmail', document.getElementById('primary-email').value);
+        formData.append('experience', document.getElementById('experience').value);
+        formData.append('skills', document.getElementById('skills').value);
+        formData.append('education', document.getElementById('education').value);
+        formData.append('workType', document.getElementById('work-type').value);
+        formData.append('coverLetter', document.getElementById('cover-letter').value);
+        formData.append('resume', document.getElementById('resume-upload').files[0]);
+
+        try {
+            // THIS IS THE REAL BACKEND CALL
+            const response = await fetch('/submit_application', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                await fetchUserApplications(); // Re-fetch applications to update the list
+                alert(`Application submitted successfully! Your Application ID is ${result.applicationId}`);
+                applicationModal.classList.remove('active');
+            } else {
+                throw new Error(result.error || 'Submission failed');
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert(`There was an error submitting your application: ${error.message}`);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Application';
+        }
+    }
+    
+    // --- CORRECTED WITHDRAWAL FUNCTION ---
+    async function withdrawApplication(appId) {
+        if (!confirm("Are you sure you want to withdraw this application? This action cannot be undone.")) return;
+        try {
+            const response = await fetch('/withdraw_application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ applicationId: appId })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                currentUser.applications = currentUser.applications.filter(a => a.applicationId !== appId);
+                updateProfileUI();
+                alert("Application successfully withdrawn.");
+                renderMyApplications(); // Re-render the list view
+            } else {
+                throw new Error(result.error || 'Withdrawal failed');
+            }
+        } catch (error) {
+            console.error("Withdrawal error:", error);
+            alert("Could not withdraw application. Please try again later.");
+        }
+    }
+
+
+    // --- UI AND RENDER FUNCTIONS (Largely unchanged, but now use real data) ---
+
+    function updateProfileUI() {
+        profileNameEl.textContent = currentUser.name;
+        profileEmailEl.textContent = currentUser.email;
+        if(currentUser.name && currentUser.name !== 'Guest') {
+            profileIcon.textContent = currentUser.name.charAt(0).toUpperCase();
+        } else {
+            profileIcon.innerHTML = `<i class="fas fa-user"></i>`;
+        }
+        appCountEl.textContent = currentUser.applications.length;
+    }
+
+    function openApplicationModal(job) {
+        if (!currentUser.email) {
+            alert("Please log in to apply for jobs.");
+            // Optional: redirect to login page
+            // window.location.href = '/login.html'; 
+            return;
+        }
+        applicationForm.reset();
+        document.getElementById('apply-job-title').textContent = job.title;
+        document.getElementById('apply-job-id').value = job.id;
+        // Pre-fill with user data
+        document.getElementById('applicant-name').value = currentUser.name;
+        document.getElementById('secondary-email').value = currentUser.email;
+        applicationModal.classList.add('active');
+    }
+    
+    function renderMyApplications() {
+        const container = document.getElementById('my-applications-content');
+        if (currentUser.applications.length === 0) {
+            container.innerHTML = `<p style="text-align:center;">You have not submitted any applications yet.</p>`;
+            return;
+        }
+        container.innerHTML = currentUser.applications.map(app => `
+            <div class="app-summary-card" data-appid="${app.applicationId}">
+                <div>
+                    <h4 style="color:var(--primary-color);">${app.jobTitle}</h4>
+                    <p style="color:var(--text-muted); font-size: 0.9rem;">ID: ${app.applicationId} | Status: ${app.status}</p>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        `).join('');
+    }
+    
+    function renderApplicationDetails(appId) {
+        const app = currentUser.applications.find(a => a.applicationId === appId);
+        if (!app) return;
+        const submittedDate = new Date(app.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const container = document.getElementById('my-applications-content');
+        container.innerHTML = `
+            <button id="back-to-app-list-btn" style="margin-bottom: 1.5rem; background:none; border:none; color: var(--primary-color); cursor:pointer;"><i class="fas fa-arrow-left"></i> Back to list</button>
+            <div class="app-detail-view">
+                <h3>${app.jobTitle}</h3>
+                <div class="detail-group"><strong>Application ID:</strong> <span>${app.applicationId}</span></div>
+                <div class="detail-group"><strong>Status:</strong> <span>${app.status} on ${submittedDate}</span></div>
+                <div class="detail-group"><strong>Name:</strong> <span>${app.name}</span></div>
+                <div class="detail-group"><strong>Primary Email:</strong> <span>${app.primaryEmail}</span></div>
+                <hr style="margin: 1rem 0;">
+                <a href="${app.resumeUrl}" target="_blank" class="apply-btn" style="display:inline-block; text-decoration:none; margin-right: 1rem;">Preview Resume</a>
+                <button class="withdraw-btn" data-appid="${app.applicationId}">Withdraw Application</button>
+            </div>
+        `;
+    }
+
+    // --- EVENT LISTENERS AND INITIALIZATION (Keep as is) ---
+    // (Your existing event listeners and other helper functions go here)
+    function renderJobs(jobs) {listingsContainer.innerHTML = '';jobCountEl.textContent = `${jobs.length} Job${jobs.length !== 1 ? 's' : ''} Found`;if (jobs.length === 0) {noJobsFoundEl.style.display = 'block';return;}noJobsFoundEl.style.display = 'none';jobs.forEach(job => {const card = document.createElement('div');card.className = 'job-card';card.innerHTML = `<div class="job-card-main"><div class="job-card-details"><h3 class="job-title">${job.title}</h3><div class="job-meta"><span><i class="fas fa-map-marker-alt"></i> ${job.location}</span><span><i class="fas fa-briefcase"></i> ${job.type}</span><span><i class="fas fa-tags"></i> ${job.category}</span></div><p class="job-description-snippet">${job.description}</p></div><div class="job-card-actions"><button class="apply-btn" data-job-id="${job.id}">Apply</button></div></div>`;listingsContainer.appendChild(card);});}
+    function populateFilters() {const locations=[...new Set(allJobs.map(j=>j.location))].sort();const categories=[...new Set(allJobs.map(j=>j.category))].sort();const types=[...new Set(allJobs.map(j=>j.type))].sort();locations.forEach(l=>locationFilter.innerHTML+=`<option value="${l}">${l}</option>`);categories.forEach(c=>categoryFilter.innerHTML+=`<option value="${c}">${c}</option>`);types.forEach(t=>typeFilter.innerHTML+=`<option value="${t}">${t}</option>`)}
+    function filterJobs() {const k=keywordInput.value.toLowerCase(),l=locationFilter.value,c=categoryFilter.value,t=typeFilter.value;const f=allJobs.filter(j=>(j.title.toLowerCase().includes(k)||j.description.toLowerCase().includes(k))&&(!l||j.location===l)&&(!c||j.category===c)&&(!t||j.type===t));renderJobs(f)}
+    function showJobsView(){contentView.style.display='none';jobSearchView.style.display='block';backBtn.style.display='none';navLinks.forEach(l=>l.classList.remove('active'))}
+    function showContentView(v){let t='',c='';switch(v){case'teams':t='Our Teams';c=getTeamsContent();break;case'locations':t='Our Locations';c=getLocationsContent();break;case'culture':t='Our Culture';c=getCultureContent();break;case'benefits':t='Employee Benefits';c=getBenefitsContent();break}contentView.innerHTML=`<h1 class="content-title">${t}</h1>${c}`;jobSearchView.style.display='none';contentView.style.display='block';backBtn.style.display='inline-flex';navLinks.forEach(l=>l.classList.toggle('active',l.dataset.view===v))}
+    function getTeamsContent(){return`<div class="content-grid"><div class="content-card"><h3><i class="fas fa-cogs"></i> Engineering & Data Science</h3><p>This is the technical heart of NILA. Our engineers build and maintain our scalable e-commerce platform, while data scientists use machine learning to optimize everything from supply chains to customer recommendations.</p></div><div class="content-card"><h3><i class="fas fa-palette"></i> Design & Product</h3><p>Our design team creates the beautiful, intuitive user experiences you see on our site. They conduct research and craft user interfaces that make shopping for textiles a delight.</p></div><div class="content-card"><h3><i class="fas fa-bullhorn"></i> Marketing & Growth</h3><p>This team tells the NILA story to the world. They manage our brand, run digital campaigns, and engage with our community on social media to drive growth and customer loyalty.</p></div><div class="content-card"><h3><i class="fas fa-warehouse"></i> Operations & Supply Chain</h3><p>The backbone of our business, this team manages sourcing, logistics, and inventory. They ensure our beautiful products get from the artisan's loom to your doorstep efficiently and sustainably.</p></div></div>`}
+    function getLocationsContent(){if(allLocations.length===0)return`<p style="text-align:center; color: var(--text-muted);">Location data is currently unavailable.</p>`;const c=allLocations.map(l=>`<div class="content-card"><h3><i class="fas fa-map-marker-alt"></i> ${l.city}</h3><p><strong>${l.type}</strong></p><p>${l.address}</p></div>`).join('');return`<div class="content-grid">${c}</div>`}
+    function getCultureContent(){return`<div class="culture-section" style="max-width: 800px; margin: 0 auto; text-align: left;"><div class="content-card"><h3>Woven with Purpose</h3><p>At NILA, our culture is as important as the fabrics we sell. We believe in creating an environment where every thread of talent is valued and woven together to create something beautiful. Our core values guide everything we do.</p><h3>Innovation & Craftsmanship</h3><p>We blend modern technology with timeless craftsmanship. We encourage our teams to think creatively, take risks, and build innovative solutions that honor the rich heritage of the textile industry.</p><h3>Customer-Centric</h3><p>Our customers are at the center of our universe. We are obsessed with creating a seamless, delightful, and trustworthy experience for everyone who interacts with our brand.</p><h3>Sustainability & Ethics</h3><p>We are committed to ethical sourcing and sustainable practices. We believe in building a business that is not only profitable but also positive for the planet and the communities of artisans we work with.</p></div></div>`}
+    function getBenefitsContent(){return`<div class="content-grid"><div class="content-card"><h3><i class="fas fa-heartbeat"></i> Health & Wellness</h3><p>Your well-being is our priority. We offer comprehensive health, dental, and vision insurance for you and your family, along with wellness stipends and mental health support.</p></div><div class="content-card"><h3><i class="fas fa-umbrella-beach"></i> Time Off</h3><p>We believe in the importance of rest and rejuvenation. Enjoy generous paid time off, flexible holidays, and supportive parental leave policies.</p></div><div class="content-card"><h3><i class="fas fa-chart-line"></i> Professional Growth</h3><p>We invest in your future. Take advantage of our professional development stipend for courses, conferences, and books. We also foster internal mobility and mentorship programs.</p></div><div class="content-card"><h3><i class="fas fa-hand-holding-usd"></i> Financial Perks</h3><p>We offer competitive salaries, a retirement savings plan with company matching, and performance-based bonuses to share in the success we build together.</p></div></div>`}
+    
+    profileIcon.addEventListener('click', () => profileDropdown.classList.toggle('active'));
+    document.addEventListener('click', (e) => { if (!profileIcon.contains(e.target) && !profileDropdown.contains(e.target)) { profileDropdown.classList.remove('active'); }});
+    myApplicationsBtn.addEventListener('click', (e) => { e.preventDefault(); if (!currentUser.email) { alert("Please log in to see your applications."); return; } renderMyApplications(); myApplicationsModal.classList.add('active'); profileDropdown.classList.remove('active'); });
+    document.querySelectorAll('.modal-close').forEach(btn => { btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active')); });
+    listingsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('apply-btn')) { const jobId = e.target.dataset.jobId; const job = allJobs.find(j => j.id == jobId); if (job) openApplicationModal(job); }});
+    myApplicationsModal.addEventListener('click', (e) => { if (e.target.closest('.app-summary-card')) { renderApplicationDetails(e.target.closest('.app-summary-card').dataset.appid); } if (e.target.id === 'back-to-app-list-btn') { renderMyApplications(); } if (e.target.classList.contains('withdraw-btn')) { withdrawApplication(e.target.dataset.appid); } });
+    applicationForm.addEventListener('submit', handleApplicationSubmit);
+    navLinks.forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); showContentView(link.dataset.view); }); });
+    backBtn.addEventListener('click', showJobsView);
+    keywordInput.addEventListener('input', filterJobs);
+    locationFilter.addEventListener('change', filterJobs);
+    categoryFilter.addEventListener('change', filterJobs);
+    typeFilter.addEventListener('change', filterJobs);
+
+    async function initialize() {
+        await fetchUserDetails();
+        await fetchUserApplications();
+        await fetchJobs();
+        await fetchLocations();
+        populateFilters();
+        renderJobs(allJobs);
+    }
+
+    initialize();
+});
+</script>
