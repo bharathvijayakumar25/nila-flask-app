@@ -30,7 +30,7 @@ load_dotenv()
 # All secrets and configurations are now loaded from the environment.
 FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 FIREBASE_DATABASE_URL = os.environ.get('FIREBASE_DATABASE_URL')
-FIREBASE_CREDS_JSON = os.environ.get('FIREBASE_CREDS_JSON')
+FIREBASE_CREDS_JSON = os.environ.get('FIREBASE_CREDENTIALS_JSON')
 
 R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID')
 R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
@@ -43,7 +43,9 @@ GMAIL_SENDER_PASSWORD = os.environ.get('GMAIL_SENDER_PASSWORD')
 
 # --- Flask App Setup ---
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={
+    r"/*": {"origins": "*"}
+})
 app.secret_key = FLASK_SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
@@ -298,7 +300,7 @@ def create_modern_invoice(order_data, user_data, path_or_buffer, title="Tax Invo
     print(f"Document '{title}' successfully generated in-memory.")
     return path_or_buffer
 
-# --- Email and Validation functions ---
+# --- Email and Validation functions (Modified for Security) ---
 def send_otp_email(receiver_email, otp):
     sender_email = GMAIL_SENDER_EMAIL
     sender_password = GMAIL_SENDER_PASSWORD
@@ -318,7 +320,7 @@ def send_otp_email(receiver_email, otp):
     except Exception as e:
         print(f"Email send error: {e}")
         return False
-        
+
 def send_account_created_email(receiver_email, name):
     sender_email = GMAIL_SENDER_EMAIL
     sender_password = GMAIL_SENDER_PASSWORD
